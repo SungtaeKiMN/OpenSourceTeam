@@ -1,0 +1,29 @@
+# ?? ?? ??
+server:
+  port: 9090
+
+# database ?? ??
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/eatme?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: user_open
+    password: 1234
+  thymeleaf:
+    cache: false
+
+  # spring data jpa ??
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  profiles:
+    include: private
+
