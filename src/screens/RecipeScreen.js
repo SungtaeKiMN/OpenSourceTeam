@@ -13,7 +13,7 @@ const RecipeScreen = () => {
 
   useEffect(() => {
     // TODO: 실제 백엔드 API 주소로 교체
-    fetch(`https://your-backend.com/api/recipes?ingredient=${encodeURIComponent(ingredient)}`)
+    fetch(`http://25.33.179.119:9099/recipes?ingredient=${encodeURIComponent(ingredient)}`)
       .then(res => res.json())
       .then(data => {
         setRecipes(data); // [{id, name, ingredient, steps: [string, ...]}, ...]

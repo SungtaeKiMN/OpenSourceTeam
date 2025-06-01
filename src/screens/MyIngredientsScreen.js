@@ -8,7 +8,7 @@ const MyIngredientsScreen = () => {
 
   const fetchUserIngredients = async () => {
     try {
-      const response = await fetch('http://25.33.179.119:3000/user/user1/ingredients');
+      const response = await fetch('http://25.33.179.119:9099/records');
       if (!response.ok) throw new Error('서버 오류');
       const data = await response.json();
       setIngredients(data);

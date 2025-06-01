@@ -20,17 +20,20 @@ const MainScreen = ({ navigation }) => {
       return;
     }
     try {
-      const response = await fetch('http://25.33.179.119:3000/user/user1/ingredients', {
+      const response = await fetch('http://25.33.179.119:9099/records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: ingredient, expiry }),
       });
-      if (!response.ok) throw new Error('서버 오류');
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`서버 오류: ${response.status} - ${errorData}`);
+      }
       Alert.alert('식자재가 등록되었습니다!');
       setIngredient('');
       setExpiry('');
     } catch (e) {
-      Alert.alert('등록 실패', e.message);
+      Alert.alert('등록 실패', `오류 발생: ${e.message}\n\n서버 연결을 확인해주세요.`);
     }
   };
 
@@ -53,6 +56,11 @@ const MainScreen = ({ navigation }) => {
             placeholder="식자재 이름"
             value={ingredient}
             onChangeText={setIngredient}
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="none"
+            keyboardType="default"
+            returnKeyType="done"
           />
         </View>
         <View style={styles.inputGroup}>
