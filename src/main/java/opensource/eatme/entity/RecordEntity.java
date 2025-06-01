@@ -20,18 +20,14 @@ public class RecordEntity {
     // 구매날짜 (nullable)
     private LocalDate purchaseDate;
 
-    @Column(nullable = false)  // 사용자명도 필수
-    private String username;
-
     // 기본 생성자
     public RecordEntity() {}
 
     // 생성자 (유통기한용)
-    public RecordEntity(String name, LocalDate expirationDate, LocalDate purchaseDate, String username) {
+    public RecordEntity(String name, LocalDate expirationDate, LocalDate purchaseDate) {
         this.name = name;
         this.expirationDate = expirationDate;
         this.purchaseDate = purchaseDate;
-        this.username = username;
     }
 
     // Getter & Setter
@@ -62,11 +58,6 @@ public class RecordEntity {
     public void setPurchaseDate(LocalDate purchaseDate) {
         this.purchaseDate = purchaseDate;
     }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public String getUsername() {
-        return username;
-    }
+    
 
 }
