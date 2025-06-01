@@ -27,11 +27,6 @@ public class RecordController {
                 .collect(Collectors.toList());
     }
 
-    /*@GetMapping
-    public List<RecordEntity> getAllRecords() {
-        return recordRepository.findAll(Sort.by(Sort.Direction.ASC, "expirationDate"));
-    }*/
-
     @PostMapping
     public RecordEntity createRecord(@RequestBody RecordEntity record) {
         return recordRepository.save(record);

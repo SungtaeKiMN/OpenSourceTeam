@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecipeService {
 
-    private final String apiKey = "74d0ba34312f47aa837c"; // 추후 yml로 이동 권장
+    private final String apiKey = "74d0ba34312f47aa837c"; // yml로 분리 권장
     private final String baseUrl = "http://openapi.foodsafetykorea.go.kr/api";
 
     public JsonNode getRecipesByIngredient(String ingredient) {
@@ -25,7 +25,7 @@ public class RecipeService {
 
         try {
             String url = String.format(
-                    "%s/%s/COOKRCP01/json/1/100/RCP_NM=%s",
+                    "%s/%s/COOKRCP01/json/1/1000/RCP_NM=%s",
                     baseUrl, apiKey, ingredient
             );
 
@@ -38,40 +38,53 @@ public class RecipeService {
 
                 for (JsonNode recipe : rawArray) {
                     ObjectNode filtered = objectMapper.createObjectNode();
+                    String name = recipe.path("RCP_NM").asText();
                     String ingredients = recipe.path("RCP_PARTS_DTLS").asText();
 
-                    filtered.put("name", recipe.path("RCP_NM").asText());
-                    filtered.put("ingredients", ingredients);
-                    filtered.put("image", recipe.path("ATT_FILE_NO_MAIN").asText());
-                    filtered.put("method", recipe.path("RCP_WAY2").asText());
-                    filtered.put("calories", recipe.path("INFO_ENG").asText());
+                    StringBuilder stepsBuilder = new StringBuilder();
+                    for (int i = 1; i <= 20; i++) {
+                        String step = recipe.path("MANUAL" + String.format("%02d", i)).asText().trim();
+                        if (!step.isEmpty()) {
+                            stepsBuilder.append(step).append("\n");
+                        }
+                    }
 
-                    // 재료 수 계산
+                    String[] stepArray = stepsBuilder.toString().trim().split("\n");
+
+                    filtered.put("name", name);
+                    filtered.put("ingredients", ingredients);
+                    ArrayNode stepNode = objectMapper.createArrayNode();
+                    for (String step : stepArray) {
+                        // "1. 1. 쌀은…" 형태로 중복된 숫자 제거
+                        String cleaned = step.replaceFirst("^\\d+\\.\\s*\\d+\\.\\s*", "")
+                                .replaceFirst("^\\d+\\.\\s*", "");
+                        stepNode.add(cleaned.trim());
+                    }
+                    filtered.set("steps", stepNode);
+
                     int ingredientCount = ingredients.isEmpty() ? 0 : ingredients.split(",").length;
                     filtered.put("ingredientCount", ingredientCount);
 
                     filteredList.add(filtered);
                 }
 
-                // 재료 수 기준 오름차순 정렬
-                filteredList.sort(Comparator.comparingInt(node -> node.get("ingredientCount").asInt()));
+                filteredList.sort(Comparator.comparingInt(n -> n.get("ingredientCount").asInt()));
 
-                // 결과 배열 생성
-                ArrayNode sortedArray = objectMapper.createArrayNode();
+                ArrayNode result = objectMapper.createArrayNode();
                 for (ObjectNode item : filteredList) {
-                    item.remove("ingredientCount"); // 정렬용 필드는 제거
-                    sortedArray.add(item);
+                    item.remove("ingredientCount"); // 정렬용 필드 제거
+                    result.add(item);
                 }
+                
 
-                return sortedArray;
+                return result;
             } else {
-                System.err.println("레시피 데이터가 없습니다.");
-                return objectMapper.createArrayNode(); // 빈 배열 반환
+                return objectMapper.createArrayNode();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return objectMapper.createArrayNode(); // 예외 발생 시에도 빈 배열 반환
+            return new ObjectMapper().createArrayNode();
         }
     }
 }

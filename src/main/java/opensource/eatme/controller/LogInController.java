@@ -3,6 +3,8 @@ package opensource.eatme.controller;
 import opensource.eatme.entity.LogInEntity;
 import opensource.eatme.service.LogInService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,9 +22,19 @@ public class LogInController {
     }
 
     // 로그인
-    @PostMapping("/login")
+    /*@PostMapping("/login")
     public String login(@RequestBody LogInEntity user) {
         boolean success = logInService.login(user.getUsername(), user.getPassword());
         return success ? "로그인 성공" : "로그인 실패";
+    }*/
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody LogInEntity user) {
+        boolean success = logInService.login(user.getUsername(), user.getPassword());
+        if (success) {
+            return ResponseEntity.ok().build(); // 200 OK, body는 없음
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+        }
     }
+
 }

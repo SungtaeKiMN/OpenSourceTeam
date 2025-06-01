@@ -1,9 +1,8 @@
-# ?? ?? ??
 server:
   address: 25.33.179.119
   port: 9099
 
-# database ?? ??
+# database
 spring:
   servlet:
     multipart:
@@ -17,7 +16,7 @@ spring:
   thymeleaf:
     cache: false
 
-  # spring data jpa ??
+  # spring data jpa
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
@@ -27,4 +26,8 @@ spring:
 
   profiles:
     include: private
+
+  frontend:
+    server:
+      url: http://25.33.179.119:9099
 
