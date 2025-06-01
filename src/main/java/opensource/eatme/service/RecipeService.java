@@ -75,7 +75,7 @@ public class RecipeService {
                     item.remove("ingredientCount"); // 정렬용 필드 제거
                     result.add(item);
                 }
-                
+
 
                 return result;
             } else {
