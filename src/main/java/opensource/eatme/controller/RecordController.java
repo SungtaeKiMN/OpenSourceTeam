@@ -1,6 +1,7 @@
 package opensource.eatme.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import opensource.eatme.entity.RecordEntity;
 import opensource.eatme.repository.RecordRepository;
@@ -18,7 +19,8 @@ public class RecordController {
 
     @GetMapping
     public List<RecordEntity> getAllRecords() {
-        return recordRepository.findAll();
+        return recordRepository.findAll(Sort.by(Sort.Direction.ASC, "expirationDate"));
+        //return recordRepository.findAll();
     }
 
     @PostMapping
