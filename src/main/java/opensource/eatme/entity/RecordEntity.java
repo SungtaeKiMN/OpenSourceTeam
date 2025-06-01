@@ -11,17 +11,27 @@ public class RecordEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
-    private LocalDate date;
+    // 유통기한 (nullable)
+    private LocalDate expirationDate;
+
+    // 구매날짜 (nullable)
+    private LocalDate purchaseDate;
+
+    @Column(nullable = false)  // 사용자명도 필수
+    private String username;
 
     // 기본 생성자
     public RecordEntity() {}
 
-    // 생성자
-    public RecordEntity(String name, LocalDate date) {
+    // 생성자 (유통기한용)
+    public RecordEntity(String name, LocalDate expirationDate, LocalDate purchaseDate, String username) {
         this.name = name;
-        this.date = date;
+        this.expirationDate = expirationDate;
+        this.purchaseDate = purchaseDate;
+        this.username = username;
     }
 
     // Getter & Setter
@@ -33,15 +43,30 @@ public class RecordEntity {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public String getUsername() {
+        return username;
+    }
+
 }
