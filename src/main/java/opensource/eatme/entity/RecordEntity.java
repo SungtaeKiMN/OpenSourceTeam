@@ -2,6 +2,7 @@ package opensource.eatme.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "records")
@@ -20,15 +21,18 @@ public class RecordEntity {
     // 구매날짜 (nullable)
     private LocalDate purchaseDate;
 
+    @Column(nullable = false)
+    private String username;
 
     // 기본 생성자
     public RecordEntity() {}
 
     // 생성자 (유통기한용)
-    public RecordEntity(String name, LocalDate expirationDate, LocalDate purchaseDate) {
+    public RecordEntity(String name, LocalDate expirationDate, LocalDate purchaseDate, String username) {
         this.name = name;
         this.expirationDate = expirationDate;
         this.purchaseDate = purchaseDate;
+        this.username = username;
     }
 
     // Getter & Setter
@@ -59,5 +63,13 @@ public class RecordEntity {
     public void setPurchaseDate(LocalDate purchaseDate) {
         this.purchaseDate = purchaseDate;
     }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
 
 }

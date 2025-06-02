@@ -34,6 +34,8 @@ dependencies {
     implementation 'software.amazon.awssdk:auth'
     implementation 'software.amazon.awssdk:regions'
     implementation 'net.coobird:thumbnailator:0.4.14'
+    implementation 'com.google.firebase:firebase-admin:9.1.1'
+
 }
 
 tasks.named('test') {
