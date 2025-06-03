@@ -35,6 +35,10 @@ dependencies {
     implementation 'software.amazon.awssdk:regions'
     implementation 'net.coobird:thumbnailator:0.4.14'
     implementation 'com.google.firebase:firebase-admin:9.1.1'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+
 
 }
 
