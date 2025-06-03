@@ -25,7 +25,7 @@ public class PostService {
                 requestDto.getTitle(),
                 requestDto.getContent(),
                 requestDto.getUsername(),
-                requestDto.getExpireDate()  // expireDate 추가
+                requestDto.getExpireDate()
         );
 
         return postRepository.save(post);
@@ -47,7 +47,7 @@ public class PostService {
 
 
     public PostResponseDto createPostAndReturnDto(PostRequestDto requestDto) {
-        PostEntity saved = createPost(requestDto);  // 기존 로직 재사용
+        PostEntity saved = createPost(requestDto);
         return new PostResponseDto(
                 saved.getId(),
                 saved.getTitle(),

@@ -21,12 +21,6 @@ public class LogInController {
         return "회원가입 완료";
     }
 
-    // 로그인
-    /*@PostMapping("/login")
-    public String login(@RequestBody LogInEntity user) {
-        boolean success = logInService.login(user.getUsername(), user.getPassword());
-        return success ? "로그인 성공" : "로그인 실패";
-    }*/
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LogInEntity user) {
         boolean success = logInService.login(user.getUsername(), user.getPassword());

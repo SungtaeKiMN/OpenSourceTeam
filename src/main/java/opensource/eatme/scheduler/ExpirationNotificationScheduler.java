@@ -27,10 +27,10 @@ public class ExpirationNotificationScheduler {
     @Autowired
     private FCMService fcmService;
 
-    // 매일 자정에 실행 (예: cron = "0 0 0 * * *")
-    //@Scheduled(cron = "0 0 0 * * *")
-    // 테스트를 위해 매 60초마다 실행
-    @Scheduled(fixedRate = 40000)
+    // 매일 자정에 실행
+    @Scheduled(cron = "0 0 0 * * *")
+    // 테스트를 위해 매 40초마다 실행
+    //@Scheduled(fixedRate = 40000)
     public void notifyExpiration() {
         LocalDate today = LocalDate.now();
         List<LocalDate> targetDates = Arrays.asList(
@@ -48,7 +48,7 @@ public class ExpirationNotificationScheduler {
             Optional<FcmTokenEntity> tokenEntityOpt = fcmTokenRepository.findByUsername(username);
 
             if (tokenEntityOpt.isPresent()) {
-                // 🔽 여기 수정된 부분 — 올바르게 username을 전달
+
                 fcmService.sendMessage(username,
                         "유통기한 알림",
                         String.format("%s의 유통기한이 %s입니다.", record.getName(), formatDDayMessage(record.getExpirationDate().toEpochDay() - today.toEpochDay()))

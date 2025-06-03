@@ -24,10 +24,9 @@ public class RecordEntity {
     @Column(nullable = false)
     private String username;
 
-    // 기본 생성자
     public RecordEntity() {}
 
-    // 생성자 (유통기한용)
+
     public RecordEntity(String name, LocalDate expirationDate, LocalDate purchaseDate, String username) {
         this.name = name;
         this.expirationDate = expirationDate;

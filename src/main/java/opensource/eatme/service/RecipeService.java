@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecipeService {
 
-    private final String apiKey = "74d0ba34312f47aa837c"; // yml로 분리 권장
+    private final String apiKey = "74d0ba34312f47aa837c";
     private final String baseUrl = "http://openapi.foodsafetykorea.go.kr/api";
 
     public JsonNode getRecipesByIngredient(String ingredient) {
@@ -55,7 +55,7 @@ public class RecipeService {
                     filtered.put("ingredients", ingredients);
                     ArrayNode stepNode = objectMapper.createArrayNode();
                     for (String step : stepArray) {
-                        // "1. 1. 쌀은…" 형태로 중복된 숫자 제거
+
                         String cleaned = step.replaceFirst("^\\d+\\.\\s*\\d+\\.\\s*", "")
                                 .replaceFirst("^\\d+\\.\\s*", "");
                         stepNode.add(cleaned.trim());
@@ -72,7 +72,7 @@ public class RecipeService {
 
                 ArrayNode result = objectMapper.createArrayNode();
                 for (ObjectNode item : filteredList) {
-                    item.remove("ingredientCount"); // 정렬용 필드 제거
+                    item.remove("ingredientCount");
                     result.add(item);
                 }
 
