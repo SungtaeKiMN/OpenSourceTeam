@@ -16,7 +16,12 @@ const RecipeScreen = () => {
     fetch(`http://25.33.179.119:9099/recipes?ingredient=${encodeURIComponent(ingredient)}`)
       .then(res => res.json())
       .then(data => {
-        setRecipes(data); // [{id, name, ingredient, steps: [string, ...]}, ...]
+        if (Array.isArray(data)) {
+          setRecipes(data);
+        } else {
+          setRecipes([]);
+          setError('레시피 데이터가 올바르지 않습니다.');
+        }
         setLoading(false);
       })
       .catch(err => {
@@ -28,9 +33,9 @@ const RecipeScreen = () => {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.recipeName}>{item.name}</Text>
-      <Text style={styles.ingredientText}>재료: {item.ingredient}</Text>
+      <Text style={styles.ingredientText}>재료: {item.ingredients}</Text>
       <Text style={styles.methodTitle}>방법</Text>
-      {item.steps.map((step, idx) => (
+      {Array.isArray(item.steps) && item.steps.map((step, idx) => (
         <Text key={idx} style={styles.methodText}>{idx + 1}. {step}</Text>
       ))}
     </View>
@@ -60,7 +65,7 @@ const RecipeScreen = () => {
         <FlatList
           data={recipes}
           renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item, idx) => item.id ? item.id.toString() : idx.toString()}
           contentContainerStyle={styles.listContent}
         />
       )}

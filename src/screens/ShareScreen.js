@@ -1,41 +1,38 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-
-const dummyLocation = '보정동'; // 추후 위치 연동
-const dummyPosts = [
-  { id: 1, title: '계란 10알 나눔', expiry: '유통기한 3일 전', chat: 5, like: 10 },
-  { id: 2, title: '베이컨 나눔', expiry: '유통기한 2일 전', chat: 5, like: 10 },
-  { id: 3, title: '브로콜리 한 박스 나눔', expiry: '유통기한 10일 전', chat: 5, like: 10 },
-  { id: 4, title: '돼지 목살 1kg 나눔', expiry: '유통기한 1일 전', chat: 5, like: 10 },
-];
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const ShareScreen = () => {
   const navigation = useNavigation();
+  const [posts, setPosts] = useState([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetch('http://25.33.179.119:9099/posts')
+        .then(res => res.json())
+        .then(data => setPosts(data))
+        .catch(err => {
+          setPosts([]);
+          console.error('게시글 불러오기 실패:', err);
+        });
+    }, [])
+  );
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PostDetail', { post: {
+      ...item,
+      expirationDate: item.expirationDate || item.expiry || item.expireDate || '',
+    } })}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.expiry}>{item.expiry}</Text>
-      <View style={styles.iconRow}>
-        <View style={styles.iconWithText}>
-          {/* chat 아이콘 */}
-          <Image source={require('../../assets/chat.png')} style={styles.icon} />
-          <Text style={styles.iconText}>{item.chat}</Text>
-        </View>
-        <View style={styles.iconWithText}>
-          {/* heart 아이콘은 임시로 하트 이모지 */}
-          <Text style={styles.heartIcon}>♡</Text>
-          <Text style={styles.iconText}>{item.like}</Text>
-        </View>
-      </View>
-    </View>
+      <Text style={styles.content}>{item.content}</Text>
+      <Text style={styles.username}>작성자: {item.username}</Text>
+    </TouchableOpacity>
   );
 
   return (
     <View style={styles.bg}>
       <View style={styles.header}>
-        <Text style={styles.location}>{dummyLocation}</Text>
+        <Text style={styles.location}>게시판</Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => navigation.navigate('Chat')}>
             <Image source={require('../../assets/chat.png')} style={styles.headerIcon} />
@@ -46,9 +43,9 @@ const ShareScreen = () => {
         </View>
       </View>
       <FlatList
-        data={dummyPosts}
+        data={posts}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id?.toString() || Math.random().toString()}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
@@ -100,31 +97,12 @@ const styles = StyleSheet.create({
     color: '#222',
     marginBottom: 4,
   },
-  expiry: {
+  content: {
     fontSize: 15,
     color: '#222',
     marginBottom: 12,
   },
-  iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconWithText: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 18,
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    marginRight: 4,
-  },
-  heartIcon: {
-    fontSize: 20,
-    color: '#FF6666',
-    marginRight: 4,
-  },
-  iconText: {
+  username: {
     fontSize: 15,
     color: '#222',
   },

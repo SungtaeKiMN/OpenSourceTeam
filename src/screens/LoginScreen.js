@@ -8,19 +8,43 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  Button,
 } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!id || !password) {
       Alert.alert('아이디와 비밀번호를 입력하세요.');
       return;
     }
-    // TODO: 실제 로그인 로직 구현
-    navigation.replace('Tab'); // 로그인 성공 시 메인(TabNavigator)으로 이동
+
+    try {
+      const response = await fetch('http://25.33.179.119:9099/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: id,
+          password: password,
+        }),
+      });
+
+      if (response.ok) {
+        await AsyncStorage.setItem('username', id);
+        navigation.replace('Tab', { screen: 'Main' });
+      } else {
+        Alert.alert('로그인 실패', '아이디 또는 비밀번호를 확인하세요.');
+      }
+    } catch (error) {
+      console.error('로그인 요청 실패:', error);
+      Alert.alert('로그인 실패', '서버에 연결할 수 없습니다.');
+    }
   };
 
   return (

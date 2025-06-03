@@ -13,6 +13,7 @@ import ShareWriteScreen from '../screens/ShareWriteScreen';
 import ChatScreen from '../screens/ChatScreen';
 import SearchScreen from '../screens/SearchScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
+import PostDetailScreen from '../screens/PostDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -71,6 +72,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Chat" component={ChatScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
+        <Stack.Screen name="PostDetail" component={PostDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

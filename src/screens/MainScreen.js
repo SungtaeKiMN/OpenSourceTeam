@@ -1,13 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MainScreen = ({ navigation }) => {
   const [ingredient, setIngredient] = useState('');
   const [expiry, setExpiry] = useState('');
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
+
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      const token = await messaging().getToken();
+      const username = await AsyncStorage.getItem('username');
+      // FCM 토큰을 백엔드로 전송
+      try {
+        await fetch('http://25.33.179.119:9099/fcm-token', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0X2lkIjoiZWF0bWUtMDJvIiwiaWF0IjoxNzEwMjQ5NjAwfQ.eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0X2lkIjoiZWF0bWUtMDJvIiwiaWF0IjoxNzEwMjQ5NjAwfQ'
+          },
+          body: JSON.stringify({ 
+            token,
+            username,
+            projectId: 'eatme-02o',
+            clientEmail: 'firebase-adminsdk-fbsvc@eatme-02o.iam.gserviceaccount.com'
+          }),
+        });
+      } catch (error) {
+        console.error('FCM 토큰 전송 실패:', error);
+      }
+    }
+  };
 
   const validateDate = (date) => {
-    // YYYY.MM.DD 형식 체크
-    return /^\d{4}\.\d{2}\.\d{2}$/.test(date);
+    // YYYY-MM-DD 형식 체크
+    return /^\d{4}-\d{2}-\d{2}$/.test(date);
   };
 
   const handleRegister = async () => {
@@ -15,25 +52,39 @@ const MainScreen = ({ navigation }) => {
       Alert.alert('식자재를 입력하세요.');
       return;
     }
+    if (!username) {
+      Alert.alert('아이디를 입력하세요.');
+      return;
+    }
     if (!validateDate(expiry)) {
       Alert.alert('유통기한을 YYYY.MM.DD 형식으로 입력하세요.');
       return;
     }
+
+    const formattedExpiry = expiry.replace(/\./g, '-');
+
     try {
       const response = await fetch('http://25.33.179.119:9099/records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: ingredient, expiry }),
+        body: JSON.stringify({
+          name: ingredient,
+          expirationDate: formattedExpiry,
+          purchaseDate: formattedExpiry,
+          username: username
+        })
       });
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`서버 오류: ${response.status} - ${errorData}`);
-      }
-      Alert.alert('식자재가 등록되었습니다!');
+
+      const data = await response.json();
+      console.log('등록 성공:', data);
+      Alert.alert('등록되었습니다!');
       setIngredient('');
       setExpiry('');
-    } catch (e) {
-      Alert.alert('등록 실패', `오류 발생: ${e.message}\n\n서버 연결을 확인해주세요.`);
+      setUsername('');
+      navigation.goBack(); // 등록 후 이전 화면으로 돌아감
+    } catch (error) {
+      console.error('등록 오류:', error);
+      Alert.alert('등록에 실패했습니다.');
     }
   };
 
@@ -49,6 +100,20 @@ const MainScreen = ({ navigation }) => {
         <Image source={require('../../assets/egg.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.appName}>Eat Me!</Text>
         <Text style={styles.title}>식자재 등록</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>아이디</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="아이디를 입력하세요"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="none"
+            keyboardType="default"
+            returnKeyType="done"
+          />
+        </View>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>식자재</Text>
           <TextInput
@@ -67,7 +132,7 @@ const MainScreen = ({ navigation }) => {
           <Text style={styles.label}>유통기한</Text>
           <TextInput
             style={styles.input}
-            placeholder="YYYY.MM.DD"
+            placeholder="YYYY-MM-DD"
             value={expiry}
             onChangeText={setExpiry}
             keyboardType="numeric"

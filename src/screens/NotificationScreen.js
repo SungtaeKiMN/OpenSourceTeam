@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NotificationScreen = () => {
   const navigation = useNavigation();
@@ -8,18 +10,89 @@ const NotificationScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // FCM 토큰 받아서 서버에 등록 & 알림 가져오기
   useEffect(() => {
-    // TODO: 실제 API 주소로 교체
-    fetch('https://your-backend.com/api/notifications')
-      .then(res => res.json())
-      .then(data => {
-        setNotifications(data); // data는 [{id, text}, ...] 형태
+    const fetchNotifications = async () => {
+      try {
+        const username = await AsyncStorage.getItem('username');
+        const token = await messaging().getToken();
+        console.log('username:', username, 'token:', token);
+
+        // FCM 토큰 서버에 전송
+        await fetch('http://25.33.179.119:9099/fcm-token', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0X2lkIjoiZWF0bWUtMDJvIiwiaWF0IjoxNzEwMjQ5NjAwfQ.eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0X2lkIjoiZWF0bWUtMDJvIiwiaWF0IjoxNzEwMjQ5NjAwfQ'
+          },
+          body: JSON.stringify({ 
+            token,
+            username,
+            projectId: 'eatme-02o',
+            clientEmail: 'firebase-adminsdk-fbsvc@eatme-02o.iam.gserviceaccount.com'
+          }),
+        });
+
+        // 서버에서 알림 데이터 받아오기
+        const res = await fetch(`http://25.33.179.119:9099/notifications?fcmToken=${token}`);
+        const data = await res.json();
+        console.log('알림 데이터:', data);
+        setNotifications(Array.isArray(data) ? data : []);
         setLoading(false);
-      })
-      .catch(err => {
-        setError('알림을 불러오지 못했습니다.');
+      } catch (err) {
+        setError('알림이 없습니다.');
         setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  // 포그라운드 상태에서 FCM 알림 받기
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('포그라운드에서 받은 알림:', remoteMessage);
+      Alert.alert(
+        remoteMessage.notification?.title || '알림',
+        remoteMessage.notification?.body || '',
+        [{ text: '확인' }]
+      );
+
+      // 화면 알림 목록에도 추가 (옵션)
+      setNotifications(prev => {
+        const arr = Array.isArray(prev) ? prev : [];
+        return [
+          {
+            id: Date.now(), // 임시 id
+            text: remoteMessage.notification?.body || '',
+          },
+          ...arr,
+        ];
       });
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // 앱이 종료 상태에서 알림 열기
+  useEffect(() => {
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log('종료 상태에서 알림으로 앱 열림:', remoteMessage.notification);
+          // 필요 시 특정 화면 이동 처리 가능
+        }
+      });
+  }, []);
+
+  // 백그라운드에서 알림 클릭했을 때 처리
+  useEffect(() => {
+    const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log('백그라운드에서 알림 클릭으로 앱 열림:', remoteMessage.notification);
+      // 필요 시 특정 화면 이동 처리 가능
+    });
+
+    return unsubscribe;
   }, []);
 
   const renderItem = ({ item }) => (
@@ -49,7 +122,7 @@ const NotificationScreen = () => {
         <FlatList
           data={notifications}
           renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.id?.toString() || Math.random().toString()}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           contentContainerStyle={styles.listContent}
         />
@@ -90,7 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#222',
-    marginRight: 40, // backBtn 공간 확보
+    marginRight: 40,
   },
   listContent: {
     backgroundColor: '#fff',
