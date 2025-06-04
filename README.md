@@ -11,9 +11,9 @@
 
 ### 백엔드 설정
 - application.yml
-  - 서버 주소를 변경해야합니다.
-  - spring:datasource의 정보를 수정해야합니다.
-  - front:server의 주소를 변경해야 합니다.
+  - server:address 서버 주소를 변경해야합니다.
+  - spring:datasource의 정보를 수정하거나 MySQL에서 같은 데이터베이스를 생성합니다. 저는 MySQL Workbench 8.0을 사용하였습니다.
+  - frontend:server:url의 주소를 변경해야 합니다.
 
 - 메일로 보내드린 json 파일을 추가하셔야 합니다.
   - src/main/java/resourses 아래에, application.yml과 같은 위치에 eateat으로 시작하는 파일을 추가합니다.
